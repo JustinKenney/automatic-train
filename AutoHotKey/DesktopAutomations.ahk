@@ -15,18 +15,23 @@ Copyright 2025 Justin Kenney
 
 */
 
-#Requires AutoHotkey v2 ;Force script to AHK v2 syntax
-#SingleInstance Force ;Allow only one instance of this script at a time
+#Requires AutoHotkey v2
+#SingleInstance Force
 #Hotstring EndChars `t ;Sets tab key as end character for all hotstrings
 
 ;Constants
-global RequestShortDate := "ShortDate"
-global RequestLongDate := "LongDate"
-global RequestSixWeeks := "SixWeeks"
+RequestShortDate := 0
+RequestLongDate := 1
+RequestSixWeeks := 6
+HotstringsTextFile := A_ScriptDir "\strings.ini"
+ErrorLog := A_ScriptDir "\LOG.txt"
+SixWeeksInDays := 42
 
 ;Main code
-GenerateDynamicHotstrings() ;Generates dynamic hotstrings on launch
-SetTimer GenerateDynamicHotstrings, 3600000 ;Regenerates dynamic hotstrings every hour
+GenerateStaticHotstrings()
+GenerateDynamicHotstrings()
+
+^+r::GenerateDynamicHotstrings() ;Usefull if you want to regenerate just the dynamic hotstrings
 
 ;Functions
 GetDate(DateType) {
@@ -34,52 +39,61 @@ GetDate(DateType) {
     {
         case RequestShortDate: Return StrUpper(FormatTime(, "dd MMM"))
         case RequestLongDate: Return StrUpper(FormatTime(, "dd MMM yyyy"))
-        case RequestSixWeeks: Return StrUpper(FormatTime(DateAdd(A_Now, 42, "days"), "dd MMM"))
-        default: Return
+        case RequestSixWeeks: Return StrUpper(FormatTime(DateAdd(A_Now, SixWeeksInDays, "days"), "dd MMM"))
+        default: FileAppend(A_Now . " - " . "Incorrect value passed to GetDate function, value passed was: " . DateType, ErrorLog)
+        Return "null"
     }
     /*
      Returns the date in the dd MMM format with the month in caps
      and appends the year if requested
 
      Can also return the date six weeks out from current date
-
-     This function makes heavy use of the built-in FormatTime
-     function to get the current date in the desired format
-     and then uses the built-in StrUpper format to convert the
-     month to upper case. A switch tree is used to determine which
-     date to return
-
-     In the case of the six weeks options, DateAdd is used to add
-     six weeks to the current date. 
-
-     If an incorrect value is passed, the function exits
-     without returning any values. This is the expected behavior.
     */
 }
 
 GenerateDynamicHotstrings() {
-    MyDynamicHotstrings := [
-    {Label: "Short Date", Trigger: "d", Value: GetDate(RequestShortDate)},
-    {Label: "Long Date", Trigger: "dy", Value: GetDate(RequestLongDate)},
-    {Label: "Six Weeks Out", Trigger: "d6", Value: GetDate(RequestSixWeeks)}
-    ]
+    MyDynamicHotstrings := Map(
+    "d", GetDate(RequestShortDate),
+    "dy", GetDate(RequestLongDate),
+    "d6", GetDate(RequestSixWeeks)
+    )
 
-    for hotstringTriggers in MyDynamicHotstrings {
-        FullyBuiltHotstring := ":" . ":" . hotstringTriggers.Trigger
+    GenerateFromCollection(MyDynamicHotstrings)
+}
 
-        Hotstring(FullyBuiltHotstring, hotstringTriggers.Value, 1)
+GenerateStaticHotstrings() {
+    MyStaticHotstrings := ReadFromHotstringsFile()
+    
+    GenerateFromCollection(MyStaticHotstrings)
+}
+
+GenerateFromCollection(collection) {
+    for triggers, values in collection {
+        FullyBuiltHotstring := ":" . ":" . triggers
+
+        Hotstring(FullyBuiltHotstring, values)
     }
+}
 
-    /*
-     This function generates hotstrings that are dynamic in nature
-     and need regular content updates
+ReadFromHotstringsFile() {
+    StringFileResults := Map()
 
-     Hotstring trigger and content are stored in an array
-     and a for loop iterates through the array to pass each
-     trigger/value pair to the built-in Hotstring function
-     which actually generates the hotstrings
-
-     The Label value in the array is currently unused
-     but server as a nice label for each trigger/value pair
-    */
+    try {
+        Loop Read, HotstringsTextFile
+        {
+            HotstringParts := StrSplit(A_LoopReadLine, ";", 2)
+            if(HotstringParts.Length >= 2) {
+                StringFileResults.Set(HotstringParts[1], HotstringParts[2])
+            } else {
+                FileAppend(A_Now . " - " . "Syntax error in strings file at " . A_Index . ": " . A_LoopReadLine . "`n", ErrorLog)
+                Continue
+            }
+        }
+    } catch as e {
+        FileAppend(A_Now . " - " . "Could not open hotstrings file. Error is " . e.Message . "`n", ErrorLog)
+        MsgBox("Error reading hotstring file " . e.Message)
+        Return
+    }
+    
+    Return StringFileResults
 }
