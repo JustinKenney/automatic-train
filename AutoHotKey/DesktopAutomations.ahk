@@ -32,6 +32,7 @@ GenerateStaticHotstrings()
 GenerateDynamicHotstrings()
 
 ^+r::GenerateDynamicHotstrings() ;Usefull if you want to regenerate just the dynamic hotstrings
++!c::ToggleApp("ms-teams.exe")
 
 ;Functions
 GetDate(DateType) {
@@ -96,4 +97,19 @@ ReadFromHotstringsFile() {
     }
     
     Return StringFileResults
+}
+
+ToggleApp(ProgramToToggle) {
+    ProgramExe := ProgramToToggle
+    WinTitle := "ahk_exe" . ProgramExe
+
+    if WinActive(WinTitle) {
+        Return WinClose(WinTitle)
+    }
+    if WinExist(WinTitle) {
+        Return WinActivate(WinTitle)
+    }
+
+    Run ProgramExe
+    Return WinWaitActive(WinTitle)
 }
