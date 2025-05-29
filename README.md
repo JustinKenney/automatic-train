@@ -5,4 +5,4 @@ This is a public repo that I started to hold all the various small scripts and a
 
 Currently, it contains my daily driver AutoHotKey script as well as a few PowerShell scripts I have started working on.
 
-Always looking for feeback!
+Always looking for feedback!
