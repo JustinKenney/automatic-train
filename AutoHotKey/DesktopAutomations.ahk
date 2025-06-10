@@ -38,9 +38,9 @@ GenerateDynamicHotstrings()
 GetDate(DateType) {
     switch DateType
     {
-        case RequestShortDate: Return StrUpper(FormatTime(, "dd MMM"))
-        case RequestLongDate: Return StrUpper(FormatTime(, "dd MMM yyyy"))
-        case RequestSixWeeks: Return StrUpper(FormatTime(DateAdd(A_Now, SixWeeksInDays, "days"), "dd MMM"))
+        case RequestShortDate: Return (FormatTime(, "dd MMM"))
+        case RequestLongDate: Return (FormatTime(, "dd MMM yyyy"))
+        case RequestSixWeeks: Return (FormatTime(DateAdd(A_Now, SixWeeksInDays, "days"), "dd MMM"))
         default: FileAppend(A_Now . " - " . "Incorrect value passed to GetDate function, value passed was: " . DateType, ErrorLog)
         Return "null"
     }
