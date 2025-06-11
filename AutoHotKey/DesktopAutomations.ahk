@@ -26,7 +26,6 @@ RequestSixWeeks := "sixweeks"
 SixWeeksInDays := 42
 ErrorLog := A_ScriptDir "\LOG.txt"
 ConfigFile := A_ScriptDir "\config.ini"
-MainConfigSection := "General"
 
 ;Main code
 if FileExist(ConfigFile) {
@@ -96,17 +95,6 @@ ImportHotstrings() {
     }
     
     Return StringFileResults
-}
-
-ImportFromConfig(SectionToRead, KeyToRead) {
-    Try {
-        KeyData := IniRead(ConfigFile, SectionToRead, KeyToRead)
-        Return KeyData
-    } catch as e {
-        FileAppend(A_Now . " - " . "Key " . KeyToRead . "does not exist in section" . SectionToRead . "of the" . ConfigFile . "file" . "`n", ErrorLog)
-        MsgBox("Key " . KeyToRead . "does not exist in section" . SectionToRead . "of the" . ConfigFile . "file")
-        Return
-    }
 }
 
 ToggleApp(ProgramToToggle) {
