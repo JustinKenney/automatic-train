@@ -20,18 +20,21 @@ Copyright 2025 Justin Kenney
 #Hotstring EndChars `t ;Sets tab key as end character for all hotstrings
 
 ;Constants
-RequestShortDate := 0
-RequestLongDate := 1
-RequestSixWeeks := 6
-HotstringsTextFile := A_ScriptDir "\strings.ini"
-ErrorLog := A_ScriptDir "\LOG.txt"
+RequestShortDate := "short"
+RequestLongDate := "long"
+RequestSixWeeks := "sixweeks"
 SixWeeksInDays := 42
+ErrorLog := A_ScriptDir "\LOG.txt"
+ConfigFile := A_ScriptDir "\config.ini"
+MainConfigSection := "General"
 
 ;Main code
-GenerateStaticHotstrings()
-GenerateDynamicHotstrings()
+if FileExist(ConfigFile) {
+    GenerateStaticHotstrings()
+    GenerateDynamicHotstrings()
+}
 
-^+r::GenerateDynamicHotstrings() ;Usefull if you want to regenerate just the dynamic hotstrings
+^+r::Reload
 +!c::ToggleApp("ms-teams.exe")
 
 ;Functions
@@ -59,49 +62,55 @@ GenerateDynamicHotstrings() {
     "d6", GetDate(RequestSixWeeks)
     )
 
-    GenerateFromCollection(MyDynamicHotstrings)
-}
-
-GenerateStaticHotstrings() {
-    MyStaticHotstrings := ReadFromHotstringsFile()
-    
-    GenerateFromCollection(MyStaticHotstrings)
-}
-
-GenerateFromCollection(collection) {
-    for triggers, values in collection {
+    for triggers, values in MyDynamicHotstrings {
         FullyBuiltHotstring := ":" . ":" . triggers
 
         Hotstring(FullyBuiltHotstring, values)
     }
 }
 
-ReadFromHotstringsFile() {
+GenerateStaticHotstrings() {
+    MyStaticHotstrings := ImportHotstrings()
+    
+    for triggers, values in MyStaticHotstrings {
+        FullyBuiltHotstring := ":" . ":" . triggers
+
+        Hotstring(FullyBuiltHotstring, values)
+    }
+}
+
+ImportHotstrings() {
     StringFileResults := Map()
+    SectionData := IniRead(ConfigFile, "Hotstrings")
 
     try {
-        Loop Read, HotstringsTextFile
+        Loop Parse, SectionData, "`n"
         {
-            HotstringParts := StrSplit(A_LoopReadLine, ";", 2)
-            if(HotstringParts.Length >= 2) {
-                StringFileResults.Set(HotstringParts[1], HotstringParts[2])
-            } else {
-                FileAppend(A_Now . " - " . "Syntax error in strings file at " . A_Index . ": " . A_LoopReadLine . "`n", ErrorLog)
-                Continue
-            }
+            HotstringParts := StrSplit(A_LoopField, "=", 2)
+            StringFileResults.Set(HotstringParts[1], HotstringParts[2])
         }
     } catch as e {
-        FileAppend(A_Now . " - " . "Could not open hotstrings file. Error is " . e.Message . "`n", ErrorLog)
-        MsgBox("Error reading hotstring file " . e.Message)
+        FileAppend(A_Now . " - " . "Error reading hotstrings from config file. Error is " . e.Message . "`n", ErrorLog)
+        MsgBox("Error reading hotstrings from config file " . e.Message)
         Return
     }
     
     Return StringFileResults
 }
 
+ImportFromConfig(SectionToRead, KeyToRead) {
+    Try {
+        KeyData := IniRead(ConfigFile, SectionToRead, KeyToRead)
+        Return KeyData
+    } catch as e {
+        FileAppend(A_Now . " - " . "Key " . KeyToRead . "does not exist in section" . SectionToRead . "of the" . ConfigFile . "file" . "`n", ErrorLog)
+        MsgBox("Key " . KeyToRead . "does not exist in section" . SectionToRead . "of the" . ConfigFile . "file")
+        Return
+    }
+}
+
 ToggleApp(ProgramToToggle) {
-    ProgramExe := ProgramToToggle
-    WinTitle := "ahk_exe" . ProgramExe
+    WinTitle := "ahk_exe" . ProgramToToggle
 
     if WinActive(WinTitle) {
         Return WinClose(WinTitle)
@@ -110,6 +119,6 @@ ToggleApp(ProgramToToggle) {
         Return WinActivate(WinTitle)
     }
 
-    Run ProgramExe
+    Run ProgramToToggle
     Return WinWaitActive(WinTitle)
 }
