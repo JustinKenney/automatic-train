@@ -35,6 +35,7 @@ if FileExist(ConfigFile) {
 
 ^+r::Reload
 +!c::ToggleApp("ms-teams.exe")
++!v::PasteAsKeystrokes
 
 ;Functions
 GetDate(DateType) {
@@ -46,12 +47,6 @@ GetDate(DateType) {
         default: FileAppend(A_Now . " - " . "Incorrect value passed to GetDate function, value passed was: " . DateType, ErrorLog)
         Return "null"
     }
-    /*
-     Returns the date in the dd MMM format with the month in caps
-     and appends the year if requested
-
-     Can also return the date six weeks out from current date
-    */
 }
 
 GenerateDynamicHotstrings() {
@@ -109,4 +104,14 @@ ToggleApp(ProgramToToggle) {
 
     Run ProgramToToggle
     Return WinWaitActive(WinTitle)
+}
+
+PasteAsKeystrokes() {
+/*
+Certain programs (not nameing names), like to randomly block
+cut and paste. So this takes the clipboard and sends it as raw keystrokes
+*/
+
+    local ToPaste := A_Clipboard
+    Send "{Raw}" . ToPaste
 }
