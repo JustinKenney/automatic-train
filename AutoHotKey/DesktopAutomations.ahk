@@ -32,8 +32,7 @@ if FileExist(ConfigFile) {
     LoadHotstrings()
 }
 else {
-    MsgBox("Configuration file note found and core script functionality will not work." . "`n" . "Exiting script")
-    ExitApp
+    MsgBox("Configuration file not found, hotstings will not load")
 
 }
 
