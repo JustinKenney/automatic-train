@@ -29,8 +29,12 @@ ConfigFile := A_ScriptDir "\config.ini"
 
 ;Main code
 if FileExist(ConfigFile) {
-    GenerateStaticHotstrings()
-    GenerateDynamicHotstrings()
+    LoadHotstrings()
+}
+else {
+    MsgBox("Configuration file note found and core script functionality will not work." . "`n" . "Exiting script")
+    ExitApp
+
 }
 
 ^+r::Reload
@@ -49,35 +53,32 @@ GetDate(DateType) {
     }
 }
 
-GenerateDynamicHotstrings() {
-    MyDynamicHotstrings := Map(
+LoadHotstrings() {
+    DynamicHotstrings := Map(
     "d", GetDate(RequestShortDate),
     "dy", GetDate(RequestLongDate),
     "d6", GetDate(RequestSixWeeks)
     )
 
-    for triggers, values in MyDynamicHotstrings {
-        FullyBuiltHotstring := ":" . ":" . triggers
+    StaticHotstrings := ImportHotstrings()
 
-        Hotstring(FullyBuiltHotstring, values)
-    }
-}
+    Generate(DynamicHotstrings)
+    Generate(StaticHotstrings)
 
-GenerateStaticHotstrings() {
-    MyStaticHotstrings := ImportHotstrings()
-    
-    for triggers, values in MyStaticHotstrings {
-        FullyBuiltHotstring := ":" . ":" . triggers
+    Generate(MapName) {
+        for triggers, values in MapName {
+            FullyBuiltHotstring := ":" . ":" . triggers
 
-        Hotstring(FullyBuiltHotstring, values)
+            Hotstring(FullyBuiltHotstring, values)
+        }
     }
 }
 
 ImportHotstrings() {
     StringFileResults := Map()
-    SectionData := IniRead(ConfigFile, "Hotstrings")
 
     try {
+        SectionData := IniRead(ConfigFile, "Hotstrings")
         Loop Parse, SectionData, "`n"
         {
             HotstringParts := StrSplit(A_LoopField, "=", 2)
@@ -109,7 +110,7 @@ ToggleApp(ProgramToToggle) {
 PasteAsKeystrokes() {
 /*
 Certain programs (not nameing names), like to randomly block
-cut and paste. So this takes the clipboard and sends it as raw keystrokes
+copy and paste. So this takes the clipboard and sends it as raw keystrokes
 */
 
     local ToPaste := A_Clipboard
