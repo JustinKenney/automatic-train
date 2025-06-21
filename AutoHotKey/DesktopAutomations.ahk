@@ -79,7 +79,7 @@ ImportHotstrings() {
     StringFileResults := Map()
 
     try {
-        SectionData := IniRead(ConfigFile, "Hotstrings")
+        SectionData := IniRead(ConfigFile, ConfigFileHotstringsSection)
         Loop Parse, SectionData, "`n"
         {
             HotstringParts := StrSplit(A_LoopField, "=", 2)
@@ -93,7 +93,7 @@ ImportHotstrings() {
     } catch as e {
         FileAppend(A_Now . " - " . "Error reading hotstrings from config file. Error is " . e.Message . "`n", ErrorLog)
         MsgBox("Error reading hotstrings from config file " . e.Message)
-        Return
+        Return Map()
     }
     
     Return StringFileResults
