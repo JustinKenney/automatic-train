@@ -122,3 +122,13 @@ copy and paste. So this takes the clipboard and sends it as raw keystrokes
     local ToPaste := A_Clipboard
     Send "{Raw}" . ToPaste
 }
+
+CreateConfigFile() {
+    DefaultValues := "
+    (
+    te = test phrase 1
+    tr = test phrase 2
+    )"
+
+    IniWrite DefaultValues, ConfigFile, ConfigFileHotstringsSection
+}
