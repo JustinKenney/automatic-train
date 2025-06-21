@@ -26,14 +26,16 @@ RequestSixWeeks := "sixweeks"
 SixWeeksInDays := 42
 ErrorLog := A_ScriptDir "\LOG.txt"
 ConfigFile := A_ScriptDir "\config.ini"
+ConfigFileHotstringsSection := "Hotstrings"
 
 ;Main code
 if FileExist(ConfigFile) {
     LoadHotstrings()
 }
 else {
-    MsgBox("Configuration file not found, hotstings will not load")
-
+    CreateConfigFile()
+    MsgBox("Configuration file not found." . 
+            "`n" . "An example file has been generated, please edit it to contain desired hotstrings")
 }
 
 ^+r::Reload
@@ -48,7 +50,7 @@ GetDate(DateType) {
         case RequestLongDate: Return (FormatTime(, "dd MMM yyyy"))
         case RequestSixWeeks: Return (FormatTime(DateAdd(A_Now, SixWeeksInDays, "days"), "dd MMM"))
         default: FileAppend(A_Now . " - " . "Incorrect value passed to GetDate function, value passed was: " . DateType, ErrorLog)
-        Return "null"
+        Return ""
     }
 }
 
@@ -77,16 +79,21 @@ ImportHotstrings() {
     StringFileResults := Map()
 
     try {
-        SectionData := IniRead(ConfigFile, "Hotstrings")
+        SectionData := IniRead(ConfigFile, ConfigFileHotstringsSection)
         Loop Parse, SectionData, "`n"
         {
             HotstringParts := StrSplit(A_LoopField, "=", 2)
-            StringFileResults.Set(HotstringParts[1], HotstringParts[2])
+            if (HotstringParts.Length == 2) {
+                StringFileResults.Set(HotstringParts[1], HotstringParts[2])
+            } else {
+                FileAppend(A_Now . " - " . "INI line misformed" . "`n", ErrorLog)
+                Continue
+            }
         }
     } catch as e {
         FileAppend(A_Now . " - " . "Error reading hotstrings from config file. Error is " . e.Message . "`n", ErrorLog)
         MsgBox("Error reading hotstrings from config file " . e.Message)
-        Return
+        Return Map()
     }
     
     Return StringFileResults
@@ -108,10 +115,20 @@ ToggleApp(ProgramToToggle) {
 
 PasteAsKeystrokes() {
 /*
-Certain programs (not nameing names), like to randomly block
+Certain programs (not naming names), like to randomly block
 copy and paste. So this takes the clipboard and sends it as raw keystrokes
 */
 
     local ToPaste := A_Clipboard
     Send "{Raw}" . ToPaste
+}
+
+CreateConfigFile() {
+    DefaultValues := "
+    (
+    te = test phrase 1
+    tr = test phrase 2
+    )"
+
+    IniWrite DefaultValues, ConfigFile, ConfigFileHotstringsSection
 }
