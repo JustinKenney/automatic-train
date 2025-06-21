@@ -26,14 +26,16 @@ RequestSixWeeks := "sixweeks"
 SixWeeksInDays := 42
 ErrorLog := A_ScriptDir "\LOG.txt"
 ConfigFile := A_ScriptDir "\config.ini"
+ConfigFileHotstringsSection := "Hotstrings"
 
 ;Main code
 if FileExist(ConfigFile) {
     LoadHotstrings()
 }
 else {
-    MsgBox("Configuration file not found, hotstings will not load")
-
+    CreateConfigFile()
+    MsgBox("Configuration file not found." . 
+            "`n" . "An example file has been generated, please edit it to contain desired hotstrings")
 }
 
 ^+r::Reload
@@ -48,7 +50,7 @@ GetDate(DateType) {
         case RequestLongDate: Return (FormatTime(, "dd MMM yyyy"))
         case RequestSixWeeks: Return (FormatTime(DateAdd(A_Now, SixWeeksInDays, "days"), "dd MMM"))
         default: FileAppend(A_Now . " - " . "Incorrect value passed to GetDate function, value passed was: " . DateType, ErrorLog)
-        Return "null"
+        Return ""
     }
 }
 
@@ -108,7 +110,7 @@ ToggleApp(ProgramToToggle) {
 
 PasteAsKeystrokes() {
 /*
-Certain programs (not nameing names), like to randomly block
+Certain programs (not naming names), like to randomly block
 copy and paste. So this takes the clipboard and sends it as raw keystrokes
 */
 
