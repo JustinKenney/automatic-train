@@ -161,7 +161,7 @@ CreateConfigFile() {
 SystemLogging(LogLevel, LogMessage) {
     try {
         LogTime := FormatTime(, "dd MMM yyyy - HH:mm:ss")
-        FileAppend(LogLevel . ": " LogTime . " - " . LogMessage, LogFile)
+        FileAppend(LogLevel . ": " LogTime . " - " . LogMessage . "`n", LogFile)
     } catch Error as e {
         MsgBox("Could not write to log file. " . e.Message)
     }
