@@ -17,7 +17,6 @@ Copyright 2025 Justin Kenney
 
 #Requires AutoHotkey v2
 #SingleInstance Force
-#Hotstring EndChars `t ;Sets tab key as end character for all hotstrings
 
 ;Constants
 RequestShortDate := "short"
@@ -62,9 +61,9 @@ GetDate(DateType) {
 
 LoadHotstrings() {
     DynamicHotstrings := Map(
-    "d", GetDate(RequestShortDate),
-    "dy", GetDate(RequestLongDate),
-    "d6", GetDate(RequestSixWeeks)
+    "shdf", GetDate(RequestShortDate),
+    "lgdf", GetDate(RequestLongDate),
+    "swdf", GetDate(RequestSixWeeks)
     )
 
     StaticHotstrings := ImportHotstrings()
