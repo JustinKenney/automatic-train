@@ -92,12 +92,12 @@ ImportHotstrings() {
             HotstringParts := StrSplit(A_LoopField, "=", 2)
             if (HotstringParts.Length == 2) {
                 StringFileResults.Set(HotstringParts[1], HotstringParts[2])
-                SystemLogging(A_Now, LogI, "Hotstrings read in from INI file")
             } else {
                 SystemLogging(A_Now, LogE, "INI line misformed")
                 Continue
             }
         }
+        SystemLogging(A_Now, LogI, "Hotstrings read in from INI file")
     } catch as e {
         SystemLogging(A_Now, LogE, "Error reading hotstrings from config file. Error is " . e.Message)
         MsgBox("Error reading hotstrings from config file. " . e.Message)
