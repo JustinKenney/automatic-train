@@ -99,8 +99,8 @@ ImportHotstrings() {
             }
         }
     } catch as e {
-        FileAppend(A_Now . " - " . "Error reading hotstrings from config file. Error is " . e.Message . "`n", LogFile)
-        MsgBox("Error reading hotstrings from config file " . e.Message)
+        SystemLogging(A_Now, LogE, "Error reading hotstrings from config file. Error is " . e.Message)
+        MsgBox("Error reading hotstrings from config file. " . e.Message)
         Return Map()
     }
     
