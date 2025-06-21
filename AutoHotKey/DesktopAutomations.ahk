@@ -83,7 +83,12 @@ ImportHotstrings() {
         Loop Parse, SectionData, "`n"
         {
             HotstringParts := StrSplit(A_LoopField, "=", 2)
-            StringFileResults.Set(HotstringParts[1], HotstringParts[2])
+            if (HotstringParts.Length == 2) {
+                StringFileResults.Set(HotstringParts[1], HotstringParts[2])
+            } else {
+                FileAppend(A_Now . " - " . "INI line misformed" . "`n", ErrorLog)
+                Continue
+            }
         }
     } catch as e {
         FileAppend(A_Now . " - " . "Error reading hotstrings from config file. Error is " . e.Message . "`n", ErrorLog)
