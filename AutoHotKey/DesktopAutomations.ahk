@@ -24,18 +24,24 @@ RequestShortDate := "short"
 RequestLongDate := "long"
 RequestSixWeeks := "sixweeks"
 SixWeeksInDays := 42
-ErrorLog := A_ScriptDir "\LOG.txt"
+
+;Logging information
+LogFile := A_ScriptDir "\LOG.txt"
+LogE := "[ERROR]"
+LogI := "[INFO]"
+LogW := "[WARNING]"
+
+;Config file information
 ConfigFile := A_ScriptDir "\config.ini"
 ConfigFileHotstringsSection := "Hotstrings"
 
 ;Main code
 if FileExist(ConfigFile) {
     LoadHotstrings()
+    SystemLogging(LogI, "Configuration file exists, begining custom setting import")
 }
 else {
     CreateConfigFile()
-    MsgBox("Configuration file not found." . 
-            "`n" . "An example file has been generated, please edit it to contain desired hotstrings")
 }
 
 ^+r::Reload
@@ -49,7 +55,7 @@ GetDate(DateType) {
         case RequestShortDate: Return (FormatTime(, "dd MMM"))
         case RequestLongDate: Return (FormatTime(, "dd MMM yyyy"))
         case RequestSixWeeks: Return (FormatTime(DateAdd(A_Now, SixWeeksInDays, "days"), "dd MMM"))
-        default: FileAppend(A_Now . " - " . "Incorrect value passed to GetDate function, value passed was: " . DateType, ErrorLog)
+        default: SystemLogging(LogE, "Incorrect value passed to GetDate function, value passed was: " . DateType)
         Return ""
     }
 }
@@ -72,6 +78,7 @@ LoadHotstrings() {
 
             Hotstring(FullyBuiltHotstring, values)
         }
+        SystemLogging(LogI, "Hotstrings locked and loaded")
     }
 }
 
@@ -86,13 +93,14 @@ ImportHotstrings() {
             if (HotstringParts.Length == 2) {
                 StringFileResults.Set(HotstringParts[1], HotstringParts[2])
             } else {
-                FileAppend(A_Now . " - " . "INI line misformed" . "`n", ErrorLog)
+                SystemLogging(LogE, "INI line misformed")
                 Continue
             }
         }
+        SystemLogging(LogI, "Hotstrings read in from INI file")
     } catch as e {
-        FileAppend(A_Now . " - " . "Error reading hotstrings from config file. Error is " . e.Message . "`n", ErrorLog)
-        MsgBox("Error reading hotstrings from config file " . e.Message)
+        SystemLogging(LogE, "Error reading hotstrings from config file. Error is " . e.Message)
+        MsgBox("Error reading hotstrings from config file. " . e.Message)
         Return Map()
     }
     
@@ -130,5 +138,31 @@ CreateConfigFile() {
     tr = test phrase 2
     )"
 
-    IniWrite DefaultValues, ConfigFile, ConfigFileHotstringsSection
+    try {
+        IniWrite DefaultValues, ConfigFile, ConfigFileHotstringsSection
+
+        CreateMessage := "
+        (
+        Configuration file not found.
+        An example file has been generated, please edit it to contain desired hotstrings.
+        )"
+        SystemLogging(LogW, CreateMessage)
+        MsgBox(CreateMessage)
+    } catch Error as e {
+        FailedCreateMessage := "
+        (
+        The configuration file could not be found, and a generic one could not be created.
+        The hotstring portion of this script will not work
+        )"
+        SystemLogging(LogE, FailedCreateMessage . e.Message)
+    }
+}
+
+SystemLogging(LogLevel, LogMessage) {
+    try {
+        LogTime := FormatTime(, "dd MMM yyyy - HH:mm:ss")
+        FileAppend(LogLevel . ": " LogTime . " - " . LogMessage . "`n", LogFile)
+    } catch Error as e {
+        MsgBox("Could not write to log file. " . e.Message)
+    }
 }
