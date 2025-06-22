@@ -33,7 +33,8 @@ Settings := Map(
 
     ;Config file information
     "ConfigFile", A_ScriptDir "\config.ini",
-    "ConfigFileHotstringsSection", "Hotstrings",
+    "HotstringSection", "Hotstrings",
+    "MainSection", "Main",
 )
 
 SystemLogging(Settings["LogI"], "Script initialized")
@@ -48,7 +49,7 @@ else {
 }
 
 ^+r::Reload
-+!c::ToggleApp("ms-teams.exe")
++!c::ToggleApp()
 +!v::PasteAsKeystrokes
 
 ;Functions
@@ -90,7 +91,7 @@ ImportHotstrings() {
     StringFileResults := Map()
 
     try {
-        SectionData := IniRead(Settings["ConfigFile"], Settings["ConfigFileHotstringsSection"])
+        SectionData := IniRead(Settings["ConfigFile"], Settings["HotstringSection"])
         Loop Parse, SectionData, "`n"
         {
             HotstringParts := StrSplit(A_LoopField, "=", 2)
@@ -111,7 +112,8 @@ ImportHotstrings() {
     Return StringFileResults
 }
 
-ToggleApp(ProgramToToggle) {
+ToggleApp() {
+    ProgramToToggle := IniRead(Settings["ConfigFile"], Settings["MainSection"], "AppToggleOne")
     WinTitle := "ahk_exe" . ProgramToToggle
 
     if WinActive(WinTitle) {
@@ -137,8 +139,8 @@ copy and paste. So this takes the clipboard and sends it as raw keystrokes
 
 CreateConfigFile() {
     try {
-        IniWrite "test phrase 1", Settings["ConfigFile"], Settings["ConfigFileHotstringsSection"], "te"
-        IniWrite "test phrase 2", Settings["ConfigFile"], Settings["ConfigFileHotstringsSection"], "tr"
+        IniWrite "test phrase 1", Settings["ConfigFile"], Settings["HotstringSection"], "te"
+        IniWrite "test phrase 2", Settings["ConfigFile"], Settings["HotstringSection"], "tr"
 
         CreateMessage := "
         (
