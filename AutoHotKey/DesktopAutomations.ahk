@@ -39,6 +39,7 @@ Settings := Map(
     ;FancyZones toggle directons
     "ToggleUp", 0,
     "ToggleDown", 1,
+    "ProcessName", "PowerToys.FancyZones.exe",
 )
 
 SystemLogging(Settings["LogI"], "Script initialized")
@@ -120,16 +121,26 @@ ImportHotstrings() {
 }
 
 ToggleApp() {
-    ProgramToToggle := IniRead(Settings["ConfigFile"], Settings["MainSection"], "AppToggleOne")
-    WinTitle := "ahk_exe" . ProgramToToggle
+    Try {
+        ProgramToToggle := IniRead(Settings["ConfigFile"], Settings["MainSection"], "AppToggleOne")
+        WinTitle := "ahk_exe" . ProgramToToggle
+    } catch as e {
+        SystemLogging(Settings["LogE"], "AppToggleOne not found in INI file [" . Settings["MainSection"] . "] section. Cannot toggle application.")
+        Return
+    }
 
     if WinActive(WinTitle) {
         Return WinClose(WinTitle)
     } if WinExist(WinTitle) {
         Return WinActivate(WinTitle)
     } else {
-        Run ProgramToToggle
-        Return WinWaitActive(WinTitle)
+        try {
+            Run ProgramToToggle
+            Return WinWaitActive(WinTitle)
+        } catch as e {
+            SystemLogging(Settings["LogE"], "Application " . ProgramToToggle . " not found!")
+            Return
+        }
     }
 }
 
@@ -144,18 +155,30 @@ copy and paste. So this takes the clipboard and sends it as raw keystrokes
 }
 
 FancyZonesStackToggle(Direction) {
-    RunCheck := ProcessExist("Bitwarden.exe")
-    if (RunCheck != 0 && Direction = 0) {
-        Send "{LWin}{PgUP}"
-    } else if (RunCheck != 0 && Direction = 1) {
-        Send "{LWin}{PgDn}"
+    RunCheck := ProcessExist(Settings["ProcessName"])
+    if (RunCheck != 0) {
+        if (Direction = Settings["ToggleUp"]) {
+            Send "{LWin}{PgUP}"
+        } else if (Direction = Settings["ToggleDown"]) {
+            Send "{LWin}{PgDn}"
+        }
+    } else {
+        SystemLogging(Settings["LogW"], "FancyZones target app '" . Settings["ProcessName"] . "' not running. Stack toggle ignored.")
     }
 }
 
 CreateConfigFile() {
     try {
-        IniWrite "test phrase 1", Settings["ConfigFile"], Settings["HotstringSection"], "te"
-        IniWrite "test phrase 2", Settings["ConfigFile"], Settings["HotstringSection"], "tr"
+        DefaultMessage := "
+        (
+            ; Use this section to fill in your desired hotstrings and replacement triggers
+            ; Make sure to use the key value format, seperated by an equals sign
+        )"
+        
+        ; creates a default toggle app
+        IniWrite "ms-edge.exe", Settings["ConfigFile"], Settings["MainSection"], "AppToggleOne"
+        ; creates hotstring sections and insert some comments on how to use
+        IniWrite DefaultMessage, Settings["ConfigFile"], Settings["HotstringSection"]
 
         CreateMessage := "
         (
