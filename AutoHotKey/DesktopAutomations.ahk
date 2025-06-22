@@ -17,6 +17,7 @@ Copyright 2025 Justin Kenney
 
 #Requires AutoHotkey v2
 #SingleInstance Force
+SetWorkingDir, A_ScriptDir
 
 Settings := Map(
     ;Constants
@@ -26,13 +27,13 @@ Settings := Map(
     "SixWeeksInDays", "42"
 
     ;Logging information
-    "LogFile", A_ScriptDir "\LOG.txt"
+    "LogFile", "\LOG.txt"
     "LogE", "[ERROR]"
     "LogI", "[INFO]"
     "LogW", "[WARNING]"
 
     ;Config file information
-    "ConfigFile", A_ScriptDir "\config.ini"
+    "ConfigFile", "\config.ini"
     "ConfigFileHotstringsSection", "Hotstrings"
 )
 
