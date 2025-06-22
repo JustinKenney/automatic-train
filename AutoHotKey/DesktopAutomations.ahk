@@ -158,9 +158,9 @@ FancyZonesStackToggle(Direction) {
     RunCheck := ProcessExist(Settings["ProcessName"])
     if (RunCheck != 0) {
         if (Direction = Settings["ToggleUp"]) {
-            Send "{LWin}{PgUP}"
+            Send "#{PgUp}"
         } else if (Direction = Settings["ToggleDown"]) {
-            Send "{LWin}{PgDn}"
+            Send "#{PgDn}"
         }
     } else {
         SystemLogging(Settings["LogW"], "FancyZones target app '" . Settings["ProcessName"] . "' not running. Stack toggle ignored.")
