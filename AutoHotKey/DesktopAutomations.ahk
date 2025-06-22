@@ -34,10 +34,12 @@ LogW := "[WARNING]"
 ConfigFile := A_ScriptDir "\config.ini"
 ConfigFileHotstringsSection := "Hotstrings"
 
+SystemLogging(LogI, "Script initialized")
+
 ;Main code
 if FileExist(ConfigFile) {
+    SystemLogging(LogI, "Configuration file exists, beginning custom setting import")
     LoadHotstrings()
-    SystemLogging(LogI, "Configuration file exists, begining custom setting import")
 }
 else {
     CreateConfigFile()
@@ -77,8 +79,9 @@ LoadHotstrings() {
 
             Hotstring(FullyBuiltHotstring, values)
         }
-        SystemLogging(LogI, "Hotstrings locked and loaded")
     }
+
+    SystemLogging(LogI, "Hotstrings locked and loaded")
 }
 
 ImportHotstrings() {
