@@ -134,14 +134,9 @@ copy and paste. So this takes the clipboard and sends it as raw keystrokes
 }
 
 CreateConfigFile() {
-    DefaultValues := "
-    (
-    te = test phrase 1
-    tr = test phrase 2
-    )"
-
     try {
-        IniWrite DefaultValues, ConfigFile, ConfigFileHotstringsSection
+        IniWrite "test phrase 1", ConfigFile, ConfigFileHotstringsSection, "te"
+        IniWrite "test phrase 2", ConfigFile, ConfigFileHotstringsSection, "tr"
 
         CreateMessage := "
         (
