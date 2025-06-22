@@ -17,31 +17,30 @@ Copyright 2025 Justin Kenney
 
 #Requires AutoHotkey v2
 #SingleInstance Force
-SetWorkingDir, A_ScriptDir
 
 Settings := Map(
     ;Constants
-    "RequestShortDate", "short"
-    "RequestLongDate", "long"
-    "RequestSixWeeks", "sixweeks"
-    "SixWeeksInDays", "42"
+    "RequestShortDate", "short",
+    "RequestLongDate", "long",
+    "RequestSixWeeks", "sixweeks",
+    "SixWeeksInDays", 42,
 
     ;Logging information
-    "LogFile", "\LOG.txt"
-    "LogE", "[ERROR]"
-    "LogI", "[INFO]"
-    "LogW", "[WARNING]"
+    "LogFile", A_ScriptDir "\LOG.txt",
+    "LogE", "[ERROR]",
+    "LogI", "[INFO]",
+    "LogW", "[WARNING]",
 
     ;Config file information
-    "ConfigFile", "\config.ini"
-    "ConfigFileHotstringsSection", "Hotstrings"
+    "ConfigFile", A_ScriptDir "\config.ini",
+    "ConfigFileHotstringsSection", "Hotstrings",
 )
 
-SystemLogging(Settings.LogI, "Script initialized")
+SystemLogging(Settings[LogI], "Script initialized")
 
 ;Main code
-if FileExist(Settings.ConfigFile) {
-    SystemLogging(Settings.LogI, "Configuration file exists, beginning custom setting import")
+if FileExist(Settings[ConfigFile]) {
+    SystemLogging(Settings[LogI], "Configuration file exists, beginning custom setting import")
     LoadHotstrings()
 }
 else {
@@ -56,19 +55,19 @@ else {
 GetDate(DateType) {
     switch DateType
     {
-        case Settings.RequestShortDate: Return (FormatTime(, "dd MMM"))
-        case Settings.RequestLongDate: Return (FormatTime(, "dd MMM yyyy"))
-        case Settings.RequestSixWeeks: Return (FormatTime(DateAdd(A_Now, Settings.SixWeeksInDays, "days"), "dd MMM"))
-        default: SystemLogging(Settings.LogE, "Incorrect value passed to GetDate function, value passed was: " . DateType)
+        case Settings[RequestShortDate]: Return (FormatTime(, "dd MMM"))
+        case Settings[RequestLongDate]: Return (FormatTime(, "dd MMM yyyy"))
+        case Settings[RequestSixWeeks]: Return (FormatTime(DateAdd(A_Now, Settings[SixWeeksInDays], "days"), "dd MMM"))
+        default: SystemLogging(Settings[LogE], "Incorrect value passed to GetDate function, value passed was: " . DateType)
         Return ""
     }
 }
 
 LoadHotstrings() {
     DynamicHotstrings := Map(
-    "shdf", GetDate(Settings.RequestShortDate),
-    "lgdf", GetDate(Settings.RequestLongDate),
-    "swdf", GetDate(Settings.RequestSixWeeks)
+    "shdf", GetDate(Settings[RequestShortDate]),
+    "lgdf", GetDate(Settings[RequestLongDate]),
+    "swdf", GetDate(Settings[RequestSixWeeks])
     )
 
     StaticHotstrings := ImportHotstrings()
@@ -84,27 +83,27 @@ LoadHotstrings() {
         }
     }
 
-    SystemLogging(Settings.LogI, "Hotstrings locked and loaded")
+    SystemLogging(Settings[LogI], "Hotstrings locked and loaded")
 }
 
 ImportHotstrings() {
     StringFileResults := Map()
 
     try {
-        SectionData := IniRead(Settings.ConfigFile, Settings.ConfigFileHotstringsSection)
+        SectionData := IniRead(Settings[ConfigFile], Settings[ConfigFileHotstringsSection])
         Loop Parse, SectionData, "`n"
         {
             HotstringParts := StrSplit(A_LoopField, "=", 2)
             if (HotstringParts.Length == 2) {
                 StringFileResults.Set(HotstringParts[1], HotstringParts[2])
             } else {
-                SystemLogging(Settings.LogE, "INI line misformed")
+                SystemLogging(Settings[LogE], "INI line misformed")
                 Continue
             }
         }
-        SystemLogging(Settings.LogI, "Hotstrings read in from INI file")
+        SystemLogging(Settings[LogI], "Hotstrings read in from INI file")
     } catch as e {
-        SystemLogging(Settings.LogE, "Error reading hotstrings from config file. Error is " . e.Message)
+        SystemLogging(Settings[LogE], "Error reading hotstrings from config file. Error is " . e.Message)
         MsgBox("Error reading hotstrings from config file. " . e.Message)
         Return Map()
     }
@@ -138,15 +137,15 @@ copy and paste. So this takes the clipboard and sends it as raw keystrokes
 
 CreateConfigFile() {
     try {
-        IniWrite "test phrase 1", Settings.ConfigFile, Settings.ConfigFileHotstringsSection, "te"
-        IniWrite "test phrase 2", Settings.ConfigFile, Settings.ConfigFileHotstringsSection, "tr"
+        IniWrite "test phrase 1", Settings[ConfigFile], Settings[ConfigFileHotstringsSection], "te"
+        IniWrite "test phrase 2", Settings[ConfigFile], Settings[ConfigFileHotstringsSection], "tr"
 
         CreateMessage := "
         (
         Configuration file not found.
         An example file has been generated, please edit it to contain desired hotstrings.
         )"
-        SystemLogging(Settings.LogW, CreateMessage)
+        SystemLogging(Settings[LogW], CreateMessage)
         MsgBox(CreateMessage)
     } catch Error as e {
         FailedCreateMessage := "
@@ -154,14 +153,14 @@ CreateConfigFile() {
         The configuration file could not be found, and a generic one could not be created.
         The hotstring portion of this script will not work
         )"
-        SystemLogging(Settings.LogE, FailedCreateMessage . e.Message)
+        SystemLogging(Settings[LogE], FailedCreateMessage . e.Message)
     }
 }
 
 SystemLogging(LogLevel, LogMessage) {
     try {
         LogTime := FormatTime(, "dd MMM yyyy - HH:mm:ss")
-        FileAppend(LogLevel . ": " LogTime . " - " . LogMessage . "`n", Settings.LogFile)
+        FileAppend(LogLevel . ": " LogTime . " - " . LogMessage . "`n", Settings[LogFile])
     } catch Error as e {
         MsgBox("Could not write to log file. " . e.Message)
     }
