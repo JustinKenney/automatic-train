@@ -104,7 +104,7 @@ ImportHotstrings() {
         SystemLogging(Settings["LogI"], "Hotstrings read in from INI file")
     } catch as e {
         SystemLogging(Settings["LogE"], "Error reading hotstrings from config file. Error is " . e.Message)
-        MsgBox("Error reading hotstrings from config file. " . e.Message)
+        TrayTip("Error reading hotstrings from config file. " . e.Message,,3)
         Return Map()
     }
     
@@ -146,7 +146,7 @@ CreateConfigFile() {
         An example file has been generated, please edit it to contain desired hotstrings.
         )"
         SystemLogging(Settings["LogW"], CreateMessage)
-        MsgBox(CreateMessage)
+        TrayTip(CreateMessage,,2)
     } catch Error as e {
         FailedCreateMessage := "
         (
@@ -162,6 +162,6 @@ SystemLogging(LogLevel, LogMessage) {
         LogTime := FormatTime(, "dd MMM yyyy - HH:mm:ss")
         FileAppend(LogLevel . ": " LogTime . " - " . LogMessage . "`n", Settings["LogFile"])
     } catch Error as e {
-        MsgBox("Could not write to log file. " . e.Message)
+        TrayTip("Could not write to log file. " . e.Message,,3)
     }
 }
