@@ -35,6 +35,10 @@ Settings := Map(
     "ConfigFile", A_ScriptDir "\config.ini",
     "HotstringSection", "Hotstrings",
     "MainSection", "Main",
+
+    ;FancyZones toggle directons
+    "ToggleUp", 0,
+    "ToggleDown", 1,
 )
 
 SystemLogging(Settings["LogI"], "Script initialized")
@@ -51,6 +55,9 @@ else {
 ^+r::Reload
 +!c::ToggleApp()
 +!v::PasteAsKeystrokes
+^#!WheelUp::FancyZonesStackToggle(Settings["ToggleUp"])
+^#!WheelDown::FancyZonesStackToggle(Settings["ToggleDown"])
+
 
 ;Functions
 GetDate(DateType) {
@@ -118,13 +125,12 @@ ToggleApp() {
 
     if WinActive(WinTitle) {
         Return WinClose(WinTitle)
-    }
-    if WinExist(WinTitle) {
+    } if WinExist(WinTitle) {
         Return WinActivate(WinTitle)
+    } else {
+        Run ProgramToToggle
+        Return WinWaitActive(WinTitle)
     }
-
-    Run ProgramToToggle
-    Return WinWaitActive(WinTitle)
 }
 
 PasteAsKeystrokes() {
@@ -135,6 +141,15 @@ copy and paste. So this takes the clipboard and sends it as raw keystrokes
 
     local ToPaste := A_Clipboard
     Send "{Raw}" . ToPaste
+}
+
+FancyZonesStackToggle(Direction) {
+    RunCheck := ProcessExist("Bitwarden.exe")
+    if (RunCheck != 0 && Direction = 0) {
+        Send "{LWin}{PgUP}"
+    } else if (RunCheck != 0 && Direction = 1) {
+        Send "{LWin}{PgDn}"
+    }
 }
 
 CreateConfigFile() {
