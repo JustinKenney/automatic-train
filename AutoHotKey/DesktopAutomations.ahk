@@ -48,6 +48,7 @@ SystemLogging(Settings["LogI"], "Script initialized")
 if FileExist(Settings["ConfigFile"]) {
     SystemLogging(Settings["LogI"], "Configuration file exists, beginning custom setting import")
     LoadHotstrings()
+    RunHelperScript()
 }
 else {
     CreateConfigFile()
@@ -204,4 +205,14 @@ SystemLogging(LogLevel, LogMessage) {
     } catch Error as e {
         TrayTip("Could not write to log file. " . e.Message,,3)
     }
+}
+
+RunHelperScript() {
+   try {
+      HelperScript := IniRead(Settings["ConfigFile"], Settings["MainSection"], "HelperScrip")
+      Run HelperScript
+   } catch as e {
+      SystemLogging(Settings["LogE"], "Helper script not found!")
+      Return
+   }
 }
