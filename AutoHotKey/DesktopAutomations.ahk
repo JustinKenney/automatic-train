@@ -211,6 +211,11 @@ RunSubscript() {
    try {
       Subscript := IniRead(Settings["ConfigFile"], Settings["MainSection"], "Subscript")
       SystemLogging(Settings["LogI"], "Subscript " . Subscript . " found. Loading.")
+
+      if (Subscript = "") {
+        SystemLogging(Settings["LogW"], "Subscript option in config file is empty, subscript not loaded")
+        Return
+      }
       Run Subscript
       SystemLogging(Settings["LogI"], "Subscript loaded")
    } catch as e {
