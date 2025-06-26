@@ -210,7 +210,7 @@ SystemLogging(LogLevel, LogMessage) {
 RunSubscript() {
    try {
       Subscript := IniRead(Settings["ConfigFile"], Settings["MainSection"], "Subscript")
-      SystemLogging(Settings["LogI"], "Subscript ". SubScript . " found. Loading.")
+      SystemLogging(Settings["LogI"], "Subscript " . Subscript . " found. Loading.")
       Run Subscript
       SystemLogging(Settings["LogI"], "Subscript loaded")
    } catch as e {
