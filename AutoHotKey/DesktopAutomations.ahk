@@ -48,6 +48,7 @@ SystemLogging(Settings["LogI"], "Script initialized")
 if FileExist(Settings["ConfigFile"]) {
     SystemLogging(Settings["LogI"], "Configuration file exists, beginning custom setting import")
     LoadHotstrings()
+    RunSubscript()
 }
 else {
     CreateConfigFile()
@@ -204,4 +205,21 @@ SystemLogging(LogLevel, LogMessage) {
     } catch Error as e {
         TrayTip("Could not write to log file. " . e.Message,,3)
     }
+}
+
+RunSubscript() {
+   try {
+      Subscript := IniRead(Settings["ConfigFile"], Settings["MainSection"], "Subscript")
+      SystemLogging(Settings["LogI"], "Subscript " . Subscript . " found. Loading.")
+
+      if (Subscript = "") {
+        SystemLogging(Settings["LogW"], "Subscript option in config file is empty, subscript not loaded")
+        Return
+      }
+      Run Subscript
+      SystemLogging(Settings["LogI"], "Subscript loaded")
+   } catch as e {
+      SystemLogging(Settings["LogE"], "Subscript not found!")
+      Return
+   }
 }
