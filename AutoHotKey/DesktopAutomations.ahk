@@ -48,7 +48,7 @@ SystemLogging(Settings["LogI"], "Script initialized")
 if FileExist(Settings["ConfigFile"]) {
     SystemLogging(Settings["LogI"], "Configuration file exists, beginning custom setting import")
     LoadHotstrings()
-    RunHelperScript()
+    RunSubscript()
 }
 else {
     CreateConfigFile()
@@ -207,12 +207,14 @@ SystemLogging(LogLevel, LogMessage) {
     }
 }
 
-RunHelperScript() {
+RunSubscript() {
    try {
-      HelperScript := IniRead(Settings["ConfigFile"], Settings["MainSection"], "HelperScrip")
-      Run HelperScript
+      Subscript := IniRead(Settings["ConfigFile"], Settings["MainSection"], "Subscript")
+      SystemLogging(Settings["LogI"], "Subscript ". SubScript . " found. Loading.")
+      Run Subscript
+      SystemLogging(Settings["LogI"], "Subscript loaded")
    } catch as e {
-      SystemLogging(Settings["LogE"], "Helper script not found!")
+      SystemLogging(Settings["LogE"], "Subscript not found!")
       Return
    }
 }
