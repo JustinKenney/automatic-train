@@ -1,3 +1,11 @@
+# Check for Administrator privileges
+# Full disclosure, I had Gemini AI write this specific check
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    # If not running as Administrator, restart the script with elevated privileges
+    Start-Process PowerShell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    exit
+}
+
 $EventLogQuery = @'
 <QueryList>
   <Query Id="0" Path="System">
@@ -6,7 +14,22 @@ $EventLogQuery = @'
 </QueryList>
 '@
 
-$EventLogSort = @{Expression = "Id"; Descending = $False},
-                @{Expression = "TimeCreated"; Descending = $True}
+$EventLogSort = @{Expression = "TimeCreated"; Descending = $True}, 
+                @{Expression = "Id"; Descending = $False}
 
-Get-WinEvent -FilterXml $EventLogQuery | Sort-Object -Property $EventLogSort | Format-Table -AutoSize
+$EventLogResults = Get-WinEvent -FilterXml $EventLogQuery | Sort-Object -Property $EventLogSort | Select-Object -Property TimeCreated, Id, LevelDisplayName, Message
+$EventLogResults | Format-Table -AutoSize
+
+try {
+  Start-Process -FilePath "sfc.exe" -ArgumentList "/scannow" -Wait -NoNewWindow
+} catch {
+  Write-Host "Error running SFC"
+  Write-Host $_
+}
+
+try {
+  Repair-WindowsImage -Online -RestoreHealth
+} catch {
+  Write-Host "Error running DISM"
+  Write-Host $_
+}
