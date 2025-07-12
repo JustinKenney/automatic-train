@@ -7,21 +7,20 @@ $ValueName = "EnableWebSignIn"
 $ValueType = "DWord"
 $ValueContents = "1"
 
-Try {
-    Set-Location -Path $RegistryPath
-} Catch {
-    Write-Host "Registry path not found!"
-}
+$FullKeyPath = Join-Path -Path $RegistryPath -ChildPath $KeyName
 
 Try {
-    New-Item -Name $KeyName -Force
+    New-Item -Path $RegistryPath -Name $KeyName -Force -ErrorAction Stop  | Out-Null
 } Catch {
     Write-Host "Could not create registry key!"
+    Write-Host "Error: $($_.Exception.Message)"
+    Exit 1
 }
 
 Try {
-    New-ItemProperty -Path $ValueName -Name $ValueName -Value $ValueContents -PropertyType $ValueType -Force
+    Set-ItemProperty -Path $FullKeyPath -Name $ValueName -Value $ValueContents -PropertyType $ValueType -Force -ErrorAction Stop | Out-Null
     Write-Host "Web sign in enabled!"
 } Catch {
     Write-Host "Could not create registry value!"
+    Exit 1
 }
