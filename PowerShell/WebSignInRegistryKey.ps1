@@ -18,9 +18,10 @@ Try {
 }
 
 Try {
-    Set-ItemProperty -Path $FullKeyPath -Name $ValueName -Value $ValueContents -PropertyType $ValueType -Force -ErrorAction Stop | Out-Null
+    Set-ItemProperty -Path $FullKeyPath -Name $ValueName -Value $ValueContents -Type $ValueType -Force -ErrorAction Stop | Out-Null
     Write-Host "Web sign in enabled!"
 } Catch {
     Write-Host "Could not create registry value!"
+    Write-Host "Error: $($_.Exception.Message)"
     Exit 1
 }
