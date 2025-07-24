@@ -14,22 +14,25 @@ $EventLogQuery = @'
 </QueryList>
 '@
 
-$EventLogSort = @{Expression = "TimeCreated"; Descending = $True}, 
-                @{Expression = "Id"; Descending = $False}
+$EventLogSort = @{Expression = "Id"; Descending = $False},
+                @{Expression = "TimeCreated"; Descending = $True}
 
 $EventLogResults = Get-WinEvent -FilterXml $EventLogQuery | Sort-Object -Property $EventLogSort | Select-Object -Property TimeCreated, Id, LevelDisplayName, Message
 $EventLogResults | Format-Table -AutoSize
 
 try {
-  Start-Process -FilePath "sfc.exe" -ArgumentList "/scannow" -Wait -NoNewWindow
+  Write-Host "Beginning SFC scan. Please wait"
+  $SFCResults = Start-Process -FilePath "sfc.exe" -ArgumentList "/scannow" -Wait -NoNewWindow
 } catch {
   Write-Host "Error running SFC"
-  Write-Host $_
+  Write-Host "Error: $($_.Exception.Message)"
 }
 
 try {
-  Repair-WindowsImage -Online -RestoreHealth
+  Write-Host "Beginning DISM scan"
+  $DISMResults = Repair-WindowsImage -Online -RestoreHealth
+  Write-Host "DISM scan complete"
 } catch {
   Write-Host "Error running DISM"
-  Write-Host $_
+  Write-Host "Error: $($_.Exception.Message)"
 }
