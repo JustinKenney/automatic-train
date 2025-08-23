@@ -59,7 +59,11 @@ else {
 +!v::PasteAsKeystrokes
 ^#!WheelUp::FancyZonesStackToggle(Settings["ToggleUp"])
 ^#!WheelDown::FancyZonesStackToggle(Settings["ToggleDown"])
+^#z::EditSettings
 
+Tray := A_TrayMenu
+Tray.Add()
+Tray.Add("Edit settings file", EditSettings)
 
 ;Functions
 GetDate(DateType) {
@@ -222,4 +226,13 @@ RunSubscript() {
       SystemLogging(Settings["LogE"], "Subscript not found!")
       Return
    }
+}
+
+EditSettings(*) {
+    try {
+        RunWait(Settings["ConfigFile"])
+    }
+    catch as e {
+        SystemLogging(Settings["LogE"], "Could not open settings file " . Settings["ConfigFile"] . " for editing!")
+    }
 }
