@@ -1,6 +1,6 @@
 $InstallDir = 'Temp'
 $InstallLocation = 'C:\'
-$FullPath = (Join-Path -Path $InstallLocation -ChildPath $InstallDir
+$FullPath = (Join-Path -Path $InstallLocation -ChildPath $InstallDir)
 $URl ='https://for.bar.local'
 $InstallerFile = (Join-Path -Path $FullPath -ChildPath 'files.zip')
 
