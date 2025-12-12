@@ -2,7 +2,8 @@
 
 param(
     [Parameter(Mandatory)]
-    [string[]]$NetworkLocations
+    [string[]]$NetworkLocations,
+    [string[]]$InstallerTypes = ("*.msi", "*.exe")
 )
 function Get-SoftwareInstallers {
     param(
@@ -16,7 +17,5 @@ function Get-SoftwareInstallers {
         Get-ChildItem -Path $NetworkPath -Recurse -Include $FileType | Select-Object -Property Directory,Name
     }
 }
-
-$InstallerTypes = "*.msi", "*.exe"
 
 $NetworkLocations | Get-SoftwareInstallers -FileType $InstallerTypes | Out-GridView
