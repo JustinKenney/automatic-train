@@ -18,13 +18,11 @@ function Set-RegistryKey {
 
     process {
         $FullKeyPath = Join-Path -Path $RegistryPath -ChildPath $KeyName
-
         try {
             if($false -eq (Test-Path -Path $FullKeyPath)) {
                 New-Item -Path $RegistryPath -Name $KeyName -Force -ErrorAction Stop
             }
-        }
-        catch {
+        } catch {
             Write-Host "Registry key does not exist and could not be created"
         }
 
@@ -32,12 +30,10 @@ function Set-RegistryKey {
             if($ValueContents -ne (Get-ItemPropertyValue -Path $FullKeyPath -Name $ValueName)) {
                 Set-ItemProperty -Path $FullKeyPath -Name $ValueName -Value $ValueContents -Type $ValueType -Force -ErrorAction Stop
             }
-        }
-        Catch {
+        } Catch {
             Write-Host "Could not set registry value"
         }
-    }
-    
+    } 
 }
 
 $params = @{
