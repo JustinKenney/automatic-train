@@ -1,4 +1,4 @@
-#A basic script that adds a registry key to enable web sign-in on Windows (allows for signing in with modern authentication methods)
+#Adds a registry key to enable web sign-in on Windows (allows for signing in with modern authentication methods)
 #Note: script must be run as admin
 
 function Set-RegistryKey {
@@ -27,7 +27,8 @@ function Set-RegistryKey {
         }
 
         try{
-            if($ValueContents -ne (Get-ItemPropertyValue -Path $FullKeyPath -Name $ValueName)) {
+            $ValueCheck = Get-ItemProperty -Path $FullKeyPath -Name $ValueName -ErrorAction SilentlyContinue
+            if($null -eq $ValueCheck -or $ValueContents -ne $ValueCheck.$ValueName) {
                 Set-ItemProperty -Path $FullKeyPath -Name $ValueName -Value $ValueContents -Type $ValueType -Force -ErrorAction Stop
             }
         } Catch {
