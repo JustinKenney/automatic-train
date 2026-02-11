@@ -5,7 +5,7 @@ param (
     [string]$SecondCSV
 )
 
-#Take CSV file hearders and normalize them to allow data to be easily compared
+#Take CSV file headers and normalize them to allow data to be easily compared
 $FirstAttributes = @(
     @{Name="Client"; Expression={'FIRST FILE REAL HEADER NAME HERE'}},
     @{Name="Computer asset tag"; Expression={'FIRST FILE REAL HEADER NAME HERE'}},
